@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chat</title>
+    <style>
+        #chatBox {
+            display: none;
+            margin: auto;
+            width: 100%;
+            text-align: center;
+        }
+
+        #box {
+            border: 1px solid red;
+            width: 40%;
+            height: 90vh;
+            margin: auto;
+            background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png");
+            overflow-y: scroll;
+        }
+
+        #msg_input {
+            margin: 5px;
+            padding: 10px;
+            width: 335px;
+        }
+
+        #send_btn {
+            width: 60px;
+            padding: 10px;
+            margin: 0px;
+        }
+
+        .div {
+            margin: 5px;
+            border-radius: 5px;
+            padding: 2px;
+            background-color: white;
+        }
+
+        .div>p {
+            margin: 0px;
+            padding: 0px;
+            font-size: 10px;
+        }
+
+        .div>h4 {
+            text-decoration: none;
+            margin: 0px;
+            padding: 2px;
+            font-size: 30px;
+        }
+
+        #welcome {
+            width: 20%;
+            height: 20%;
+            margin: auto;
+            border: 2px solid red;
+            padding: 100px;
+            margin-top: 200px
+        }
+
+        #welcome input {
+            padding: 10px;
+            font-size: 20px;
+            /* background-color: gray; */
+            color: gray;
+            border: 2px solid black;
+            margin: 15px;
+            margin: auto;
+        }
+
+        #welcome button {
+            padding: 10px;
+            font-size: 20px;
+            background-color: rgb(35, 129, 236);
+            color: rgb(255, 246, 246);
+            border: 2px solid black;
+            margin: 15px;
+            /* margin: auto; */
+
+            width: 200px;
+            justify-content: center;
+        }
+
+        #welcome button:hover {
+            background-color: rgb(46, 35, 244);
+        }
+
+        .c {
+            color: brown;
+            text-align: center;
+        }
+
+        .a {
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="welcome">
+        <h4 class="c">Chat <span class="a">Application</span> </h4>
+        <input type="text" placeholder="enter you name" id="name">
+        <button id="enter_btn">Enter Chat</button>
+    </div>
+    <div id="chatBox">
+        <h4 class="c">Chat <span class="a">Application</span> </h4>
+        <div id="box"></div>
+        <input type="text" placeholder="type your message" id="msg_input">
+        <button id="send_btn">send</button>
+    </div>
+</body>
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js"
+    integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+"
+    crossorigin="anonymous"></script>
+<script>
+    const socket = io("http://localhost:9090", { transports: ["websocket"] })
+    var name;
+    let col = 'rgba(' + randomcolor() + ',' + randomcolor() + ',' + randomcolor() + '\)'
+
+
+    document.getElementById("enter_btn").addEventListener("click", () => {
+        console.log(name);
+        name = document.getElementById("name").value;
+
+        console.log(name);
+        if (!name) {
+            alert("Plese enter your name")
+        } else {
+            alert("Welcome to chatbot")
+            document.getElementById("welcome").style.display = "none";
+            document.getElementById("chatBox").style.display = "block";
+        }
+    })
+
+
+
+    document.getElementById("send_btn").addEventListener("click", () => {
+        let msg = document.getElementById("msg_input").value
+        socket.emit("chat1", { name, msg, col })
+        document.getElementById("msg_input").value = "";
+    })
+
+    socket.on("chat2", (data) => {
+        if (data.name && data.msg) {
+            chatMessage(data.msg, data.name, data.name == name ? true : false, data.col)
+        }
+    })
+    function randomcolor() {
+        return Math.floor(Math.random() * 255);
+    }
+
+    function chatMessage(data, name, self, col) {
+        let div = document.createElement("div")
+        div.setAttribute("class", "div")
+        let message = document.createElement("h4")
+        let sender = document.createElement("p")
+        sender.style.color = col;
+        let time = document.createElement("p")
+        message.innerText = data
+        sender.innerText = self ? "" : name
+        time.innerText = new Date().toLocaleTimeString().split(":").splice(0, 2).join(":")
+        div.style.textAlign = self ? "right" : "left"
+        time.style.textAlign = self ? "left" : "right"
+        div.style.width = "30%";
+        if (self) { div.style.marginLeft = "60%" } else (div.style.marginRight = "60%")
+        sender.style.textAlign = self ? "right" : "left"
+        div.append(sender, message, time)
+        document.getElementById("box").append(div)
+        var s = document.getElementById("box");
+        s.scrollTop = s.scrollHeight;
+    }
+</script>
+
+</html>
